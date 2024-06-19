@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MachMiles</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+
+<%- include('../partials/navbar.ejs') %>
+
+<div class="container">
+    <% if (bundles && bundles.length > 0) { %>
+        <% bundles.forEach((bundle, index) => { %>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <% if (bundle.itineraries && bundle.itineraries.length > 0) { %>
+                        <% const itinerary = bundle.itineraries[0]; %>
+                        <div class="card mb-3">
+                            <!-- Price Row -->
+                            <div class="row justify-content-center">
+                                <div class="col-6 text-center">
+                                    <% if (bundle.bundlePrice && bundle.bundlePrice.length > 0) { %>
+                                        <% const bundle_price = bundle.bundlePrice[0]; %>
+                                        <p class="card-text">Price : <%= bundle_price.price.usd.display.perBook.allInclusive %> $</p>
+                                    <% } else { %>
+                                        <p class="card-text">Price Not found</p>
+                                    <% } %>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <button class="btn btn-primary">Book Now</button><br>
+                                    <button class="btn btn-secondary">Call Now</button>
+                                </div>
+                            </div>
+                            <!-- Departure Details Row -->
+                            <div class="row justify-content-center">
+                                <div class="col-3 text-center">
+                                    <img src="<%= itinerary.itineraryInfo.ticketingCarrierContent.carrierIcon %>" class="img-fluid rounded-start" alt="Carrier Icon"><br>
+                                    <h7 class="card-title"><%= itinerary.itineraryInfo.ticketingCarrierContent.carrierName %></h7>
+                                </div>
+                                <% if (bundle.outboundSlice.segments && bundle.outboundSlice.segments.length > 0) { %>
+                                    <% const my_segments = bundle.outboundSlice.segments[0]; %>
+                                    <div class="col-3 text-center">
+                                        <p class="card-text">Departure Time : <%= my_segments.departDateTime %></p>
+                                        <p class="card-text"><%= my_segments.destinationAirport %> </p>
+                                    </div>
+                                    <div class="col-3 text-center">
+                                        <p class="card-text">Arrival Time : <%= my_segments.arrivalDateTime %></p>
+                                        <p class="card-text"><%= my_segments.originAirport %> </p>
+                                    </div>
+                                <% } else { %>
+                                    <div class="col-3 text-center">
+                                        <p class="card-text">No Time found</p>
+                                    </div>
+                                <% } %>
+                                <div class="col-3 text-center">
+                                    <p class="card-text">Total Trip Duration: <%= bundle.outboundSlice.duration %>m</p>
+                                </div>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <p>No itineraries found</p>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <p>No flights found</p>
+    <% } %>
+</div>
+
+<a href="/" class="btn btn-primary mt-3">Search Again</a>
+
+<%- include('../partials/footer.ejs') %>
+
+<!-- Option 1: Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
