@@ -13,22 +13,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Add SSH key to agent
-        run: |
-          echo "${{ secrets.VPS_SSH_KEY }}" > key.pem  # Add private key content to temporary file
-          chmod 600 key.pem  # Set proper permissions
-          eval "$(ssh-agent -s)"  # Start the SSH agent
-          ssh-add - <<< "${{ secrets.SSH_PASSPHRASE }}"  # Use - for reading from stdin
-          rm key.pem  # Remove temporary file
-
       - name: Run deployment script on VPS
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.6  # Consider updating if needed
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd ~
             cd machmiles
             git pull origin main
             npm install
-            pm2 restart server.js  # Adjust script name as needed
+            pm2 restart server.js
