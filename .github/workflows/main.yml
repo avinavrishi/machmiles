@@ -10,18 +10,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3  # Updated to latest version (v3)
 
-    - name: Run deployment script on VPS
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USERNAME }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        script: |
-          cd ~
-          cd machmiles
-          git pull origin main
-          npm install
-          pm2 restart your-app-name
+      - name: Use Node.js 22  # Match your server's version
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run deployment script on VPS
+        uses: appleboy/ssh-action@v0.1.6  # Consider updating to latest if needed
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd ~
+            cd machmiles
+            git pull origin main
+            npm install
+            pm2 restart your-app-name
