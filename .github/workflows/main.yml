@@ -29,4 +29,4 @@ jobs:
             cd machmiles
             git pull origin main
             npm install
-            pm2 restart your-app-name
+            pm2 restart server.js
