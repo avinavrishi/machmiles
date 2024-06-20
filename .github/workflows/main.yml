@@ -15,7 +15,7 @@ jobs:
 
       - name: Add SSH key to agent (assuming private key stored in secret named VPS_SSH_KEY)
         run: |
-          echo "$VPS_SSH_KEY" >> key.pem  # Add private key content to temporary file
+          echo "$VPS_SSH_KEY" > key.pem  # Add private key content to temporary file
           chmod 600 key.pem  # Set proper permissions
           eval "$(ssh-agent -s)"  # Start the SSH agent
           ssh-add key.pem  # Add the key to the agent
