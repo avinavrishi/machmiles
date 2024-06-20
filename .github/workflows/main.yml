@@ -20,8 +20,4 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd ~
-            cd machmiles
-            git pull origin main
-            npm install
-            pm2 restart server.js
+            sh /home/ubuntu/deploy.sh
