@@ -7,24 +7,22 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Update OS if needed
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Add SSH key to agent (assuming private key stored in secret named VPS_SSH_KEY)
+      - name: Add SSH key to agent
         run: |
           echo "${{ secrets.VPS_SSH_KEY }}" > key.pem  # Add private key content to temporary file
           chmod 600 key.pem  # Set proper permissions
           eval "$(ssh-agent -s)"  # Start the SSH agent
-          ssh-add key.pem <<< $' \n'
+          ssh-add - <<< "${{ secrets.SSH_PASSPHRASE }}"  # Use - for reading from stdin
           rm key.pem  # Remove temporary file
 
       - name: Run deployment script on VPS
-        uses: appleboy/ssh-action@v0.1.6  # Consider updating if needed
-        env:
-          SSH_AUTH_SOCK: ${{ runner.env.SSH_AUTH_SOCK }}
+        uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
@@ -33,4 +31,4 @@ jobs:
             cd machmiles
             git pull origin main
             npm install
-            pm2 restart server.js
+            pm2 restart server.js  # Adjust script name as needed
