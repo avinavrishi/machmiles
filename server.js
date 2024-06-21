@@ -14,6 +14,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
 app.use(express.static('public'));
 
+// Endpoint to serve the sitemap
+app.get('/sitemap.xml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
+});
+
 app.get('/', (req, res) => {
   res.render('pages/index');
 });
