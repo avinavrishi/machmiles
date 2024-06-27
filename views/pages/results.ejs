@@ -30,7 +30,9 @@
                                     <% } %>
                                 </div>
                                 <div class="col-6 text-center">
-                                    <button class="btn btn-primary">Book Now</button><br>
+                                    <input type="hidden" class="itinerary-id" value="<%= itinerary.itineraryInfo.id %>">
+                                    <input type="hidden" class="itinerary-token" value="<%= itinerary.itineraryInfo.token %>">
+                                    <button class="btn btn-primary book-now">Book Now</button><br>
                                     <button class="btn btn-secondary">Call Now</button>
                                 </div>
                             </div>
@@ -77,5 +79,19 @@
 
 <!-- Option 1: Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.book-now').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const cardBody = this.closest('.card-body');
+                const itineraryId = cardBody.querySelector('.itinerary-id').value;
+                const itineraryToken = cardBody.querySelector('.itinerary-token').value;
+
+                const url = `/flight-details?id=${itineraryId}&token=${itineraryToken}`;
+                window.location.href = url;
+            });
+        });
+    });
+</script>
 </body>
 </html>
