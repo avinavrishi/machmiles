@@ -85,7 +85,7 @@ router.get('/logout', (req, res) => {
             console.error('Error destroying session:', err.message);
             res.status(500).send('Unable to log out');
         } else {
-            res.redirect('/index');
+            res.redirect('/');
         }
     });
 });
