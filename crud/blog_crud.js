@@ -28,33 +28,39 @@ const categoryCRUD = {
     }
 };
 
-// CRUD operations for Posts
-const postCRUD = {
-    create: (title, content, author, categoryId, callback) => {
-        const sql = 'INSERT INTO posts (title, content, author, date_created, category_id) VALUES (?, ?, ?, datetime(\'now\'), ?)';
-        db.run(sql, [title, content, author, categoryId], function(err) {
-            callback(err, this ? this.lastID : null);
-        });
-    },
-    read: (callback) => {
-        const sql = 'SELECT * FROM posts';
-        db.all(sql, [], (err, rows) => {
-            callback(err, rows);
-        });
-    },
-    update: (postId, title, content, author, categoryId, callback) => {
-        const sql = 'UPDATE posts SET title = ?, content = ?, author = ?, category_id = ? WHERE post_id = ?';
-        db.run(sql, [title, content, author, categoryId, postId], function(err) {
-            callback(err, this.changes);
-        });
-    },
-    delete: (postId, callback) => {
-        const sql = 'DELETE FROM posts WHERE post_id = ?';
-        db.run(sql, [postId], function(err) {
-            callback(err, this.changes);
-        });
-    }
-};
+    // CRUD operations for Posts
+    const postCRUD = {
+        create: (title, content, author, categoryId, callback) => {
+            const sql = 'INSERT INTO posts (title, content, author, date_created, category_id) VALUES (?, ?, ?, datetime(\'now\'), ?)';
+            db.run(sql, [title, content, author, categoryId], function(err) {
+                callback(err, this ? this.lastID : null);
+            });
+        },
+        read: (postId, callback) => {
+            const sql = 'SELECT * FROM posts WHERE post_id = ?';
+            db.get(sql, [postId], (err, row) => {
+                callback(err, row);
+            });
+        },
+        readAll: (callback) => {
+            const sql = 'SELECT * FROM posts ORDER BY date_created DESC';
+            db.all(sql, [], (err, rows) => {
+                callback(err, rows);
+            });
+        },
+        update: (postId, title, content, author, categoryId, callback) => {
+            const sql = 'UPDATE posts SET title = ?, content = ?, author = ?, category_id = ? WHERE post_id = ?';
+            db.run(sql, [title, content, author, categoryId, postId], function(err) {
+                callback(err, this.changes);
+            });
+        },
+        delete: (postId, callback) => {
+            const sql = 'DELETE FROM posts WHERE post_id = ?';
+            db.run(sql, [postId], function(err) {
+                callback(err, this.changes);
+            });
+        }
+    };
 
 // CRUD operations for Comments
 const commentCRUD = {

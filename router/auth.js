@@ -1,26 +1,9 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../crud/auth_crud'); 
+const { isAuthenticated, isAdmin } = require('../middleware/auth');
 
 const router = express.Router();
-
-// Middleware to check if the user is authenticated
-function isAuthenticated(req, res, next) {
-    if (req.session && req.session.user) {
-        return next();
-    } else {
-        res.redirect('/login');
-    }
-}
-
-// Middleware to check if the user is an admin
-function isAdmin(req, res, next) {
-    if (req.session && req.session.user && req.session.user.is_admin === 1) {
-        return next();
-    } else {
-        res.status(403).send('Access denied');
-    }
-}
 
 // Register Page
 router.get('/register', (req, res) => {
@@ -102,10 +85,10 @@ router.get('/logout', (req, res) => {
             console.error('Error destroying session:', err.message);
             res.status(500).send('Unable to log out');
         } else {
-            res.redirect('/login');
+            res.redirect('/index');
         }
     });
 });
 
-
+// Exporting middleware functions and router
 module.exports = router;

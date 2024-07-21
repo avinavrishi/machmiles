@@ -4,6 +4,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const authRoutes = require('./router/auth');
 const agodaRoutes = require('./router/agoda');
+const blogRoutes = require('./router/blog');
 
 dotenv.config();
 
@@ -27,7 +28,8 @@ app.use(express.static('public'));
 
 // Use Routes
 app.use('/', authRoutes);
-app.use('/',agodaRoutes);
+app.use('/', agodaRoutes);
+app.use('/', blogRoutes);
 
 // Endpoint to serve the sitemap
 app.get('/sitemap.xml', (req, res) => {
