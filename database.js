@@ -134,10 +134,10 @@ function createTables() {
 }
 
 function checkCreateAdmin() {
-    const adminUsername = 'admin';
-    const adminEmail = 'admin@gmail.com';
-    const adminPassword = 'Admin@123';
-    const isAdmin = 1;
+    const adminUsername = process.env.adminUsername;
+    const adminEmail = process.env.adminEmail;
+    const adminPassword = process.env.adminPassword;
+    const isAdmin = process.env.isAdmin;
 
     // Check if admin user already exists
     const checkAdminQuery = `SELECT * FROM users WHERE username = ?`;
