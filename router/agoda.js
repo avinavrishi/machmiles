@@ -43,6 +43,7 @@ try {
 });
 
 router.get('/search-flights', async (req, res) => {
+    
 const { flying_from, flying_to, departure_date, adults, children, infants, return_date } = req.query;
 
 const options = {
