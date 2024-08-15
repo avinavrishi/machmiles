@@ -40,14 +40,36 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     refresh_token_expires = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
-    refresh_token = create_refresh_token(data={"sub": user.username}, expires_delta=refresh_token_expires)
+
+    # Insert username and user_id into the token data
+    token_data = {
+        "sub": user.username,
+        "user_id": db_user.user_id
+    }
+
+    access_token = create_access_token(data=token_data, expires_delta=access_token_expires)
+    refresh_token = create_refresh_token(data=token_data, expires_delta=refresh_token_expires)
 
     # Save tokens in the database
-    db_token_access = Token(user_id=db_user.user_id, token_type="access", token=access_token, expires_at=datetime.utcnow() + access_token_expires)
-    db_token_refresh = Token(user_id=db_user.user_id, token_type="refresh", token=refresh_token, expires_at=datetime.utcnow() + refresh_token_expires)
+    db_token_access = Token(
+        user_id=db_user.user_id,
+        token_type="access",
+        token=access_token,
+        expires_at=datetime.utcnow() + access_token_expires
+    )
+    db_token_refresh = Token(
+        user_id=db_user.user_id,
+        token_type="refresh",
+        token=refresh_token,
+        expires_at=datetime.utcnow() + refresh_token_expires
+    )
     db.add(db_token_access)
     db.add(db_token_refresh)
     db.commit()
 
-    return {"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "refresh_token": refresh_token
+    }
+

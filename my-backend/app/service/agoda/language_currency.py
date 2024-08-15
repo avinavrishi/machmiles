@@ -2,7 +2,7 @@ import requests
 from core.config import RAPIDAPI_KEY, RAPIDAPI_HOST
 
 
-def language():
+def get_language():
 
     url = "https://agoda-com.p.rapidapi.com/languages"
 
@@ -13,11 +13,9 @@ def language():
 
     response = requests.get(url, headers=headers)
 
-    print(response.json())
-
     return response.json()
 
-def currency():
+def get_currency():
     url = "https://agoda-com.p.rapidapi.com/currencies"
 
     headers = {
@@ -26,7 +24,5 @@ def currency():
     }
 
     response = requests.get(url, headers=headers)
-
-    print(response.json())
 
     return response.json()
