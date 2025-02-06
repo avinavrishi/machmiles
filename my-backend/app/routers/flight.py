@@ -47,6 +47,37 @@ class GetFlightDetails(BaseModel):
     language: Optional[str] = 'en-us'
     currency: Optional[str] = 'USD'
 
+class GetConfirmFlightBooking(BaseModel):
+    itinerary_id: str
+    itinerary_token: str
+    flight_number: str
+    seat_class: str
+    departure_date: date
+    arrival_date: date
+    departure_airport: str
+    arrival_airport: str
+    price: float
+    gender: str
+    first_name: str
+    middle_name: Optional[str]
+    last_name: str
+    date_of_birth: str
+    redress_number: Optional[str]
+    known_traveller_id: Optional[str]
+    email: str
+    mobile: str
+
+    card_number: str
+    card_holder_name: str
+    expiration_date: str
+    cvv: str
+    billing_address: str
+    city: str
+    state: str
+    postal_code: str
+    country: str
+    billing_phone: str
+
 
 
 router = APIRouter()
@@ -121,6 +152,8 @@ def search_one_way_flight(request_data: SearchOneWayPayload):
 
         # print(itenary_data)
         # print("=======================")
+        
+
         data.append(itenary_data)
 
     return JSONResponse(content=data)
@@ -215,5 +248,61 @@ def search_one_way_flight(request_data: GetFlightDetails):
     return JSONResponse(content=itenary_data)
 
 
+@router.post("/confirm-flight-booking")
+def confirm_flight_booking(request_data: GetConfirmFlightBooking, db: Session = Depends(get_db)):
+    try:
+        # Step 1: Save Booking Details
+        new_booking = Booking(
+            itinerary_id=request_data.itinerary_id,
+            itinerary_token=request_data.itinerary_token,
+            flight_number=request_data.flight_number,
+            departure_date=request_data.departure_date,
+            arrival_date=request_data.arrival_date,
+            departure_airport=request_data.departure_airport,
+            arrival_airport=request_data.arrival_airport,
+            seat_class=request_data.seat_class,  # Assuming a default seat class
+            price=request_data.price,
+            gender=request_data.gender,
+            first_name=request_data.first_name,
+            middle_name=request_data.middle_name,
+            last_name=request_data.last_name,
+            date_of_birth=request_data.date_of_birth,
+            redress_number=request_data.redress_number,
+            known_traveller_id=request_data.known_traveller_id,
+            email=request_data.email,
+            mobile=request_data.mobile,
+            pnr_number=None  # Can be generated later
+        )
 
+        db.add(new_booking)
+        db.commit()
+        db.refresh(new_booking)  # Retrieve the newly created booking_id
+
+        # Step 2: Save Payment Details
+        new_payment = Payment(
+            booking_id=new_booking.booking_id,
+            card_number=request_data.card_number,
+            card_holder_name=request_data.card_holder_name,
+            expiration_date=request_data.expiration_date,
+            cvv=request_data.cvv,
+            billing_address=request_data.billing_address,
+            city=request_data.city,
+            state=request_data.state,
+            postal_code=request_data.postal_code,
+            country=request_data.country,
+            billing_phone=request_data.billing_phone
+        )
+
+        db.add(new_payment)
+        db.commit()
+
+        return {
+            "status": "success",
+            "message": "Flight booking confirmed successfully!",
+            "booking_id": new_booking.booking_id
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Booking failed: {str(e)}")
 

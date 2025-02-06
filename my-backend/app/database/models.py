@@ -23,8 +23,6 @@ class User(BaseTable):
     is_staff = Column(Integer, nullable=True)
 
     # Relationships
-    bookings = relationship('Booking', back_populates='user')
-    payments = relationship('Payment', back_populates='user')
     tokens = relationship('Token', back_populates='user')  # Added relationship
 
 class Token(Base):
@@ -43,7 +41,11 @@ class Booking(BaseTable):
     __tablename__ = 'bookings'
 
     booking_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'))
+    user_id = Column(Integer, nullable=True)
+    itinerary_id = Column(String, nullable = False)
+    itinerary_token = Column(String, nullable = False)
+    pnr_number = Column(String, nullable = True)
+
     flight_number = Column(String, nullable=False)
     departure_date = Column(DateTime, nullable=False)
     arrival_date = Column(DateTime, nullable=False)
@@ -52,54 +54,33 @@ class Booking(BaseTable):
     seat_class = Column(String, nullable=False)
     price = Column(Float, nullable=False)
 
-    # Relationships
-    user = relationship('User', back_populates='bookings')
+    gender = Column(String, nullable = False)
+    first_name = Column(String, nullable = False)
+    middle_name = Column(String, nullable= True)
+    last_name = Column(String, nullable=False)
+    date_of_birth = Column(String, nullable = False)
+
+    redress_number = Column(String, nullable = True)
+    known_traveller_id = Column(String, nullable = True)
+
+    email = Column(String, nullable = False)
+    mobile = Column(String, nullable = False)
+
 
 class Payment(BaseTable):
     __tablename__ = 'payments'
 
     payment_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'))
+    user_id = Column(Integer, nullable = True)
+    booking_id = Column(Integer, nullable=False)
+    
     card_number = Column(String, nullable=False)
     card_holder_name = Column(String, nullable=False)
     expiration_date = Column(String, nullable=False)
     cvv = Column(String, nullable=False)
-
-    # Relationships
-    user = relationship('User', back_populates='payments')
-
-class Category(BaseTable):
-    __tablename__ = 'categories'
-
-    category_id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String, unique=True, nullable=False)
-    description = Column(Text, nullable=True)
-
-    # Relationships
-    posts = relationship('Post', back_populates='category')
-
-class Post(BaseTable):
-    __tablename__ = 'posts'
-
-    post_id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String, nullable=False)
-    content = Column(Text, nullable=False)
-    author = Column(String, nullable=False)
-    date_created = Column(DateTime, nullable=False)
-    category_id = Column(Integer, ForeignKey('categories.category_id'))
-
-    # Relationships
-    category = relationship('Category', back_populates='posts')
-    comments = relationship('Comment', back_populates='post')
-
-class Comment(BaseTable):
-    __tablename__ = 'comments'
-
-    comment_id = Column(Integer, primary_key=True, autoincrement=True)
-    post_id = Column(Integer, ForeignKey('posts.post_id'))
-    author = Column(String, nullable=False)
-    content = Column(Text, nullable=False)
-    date_created = Column(DateTime, nullable=False)
-
-    # Relationships
-    post = relationship('Post', back_populates='comments')
+    billing_address = Column(String, nullable=False)
+    city = Column(String, nullable=False)
+    state = Column(String, nullable=False)
+    postal_code = Column(String, nullable=False)
+    country = Column(String, nullable=False)
+    billing_phone = Column(String, nullable=False)
