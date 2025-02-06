@@ -4,3 +4,4 @@ my-backend/app/dev.conf
 my-backend/app/machmiles-env
 ghp_A1ksaLfFZ0ITkLDPuimrODvy9vmoLv1.txt
 *.pyc
+my-backend/app/flight.db
