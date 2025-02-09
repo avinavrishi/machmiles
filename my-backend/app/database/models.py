@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from .session import Base
 from sqlalchemy.sql import func
 # from sqlalchemy.dialects.postgresql import ARRAY
-
+ 
 class BaseTable(Base):
     __abstract__ = True
 
@@ -65,6 +65,8 @@ class Booking(BaseTable):
 
     email = Column(String, nullable = False)
     mobile = Column(String, nullable = False)
+
+    status = Column(Integer, nullable= True)
 
 
 class Payment(BaseTable):

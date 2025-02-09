@@ -3,9 +3,7 @@ from database.session import engine
 from database import models
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import auth, flight
-
-# from core.config import CRQ_SECRET_KEY
+from routers import auth, flight, admin
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -24,6 +22,7 @@ app.add_middleware(
 # Include your routers here
 app.include_router(auth.router, prefix="/rest/v1/auth", tags=["Authentication"])
 app.include_router(flight.router, prefix="/rest/v1/flight", tags=["Flight Api"])
+app.include_router(flight.router, prefix="/rest/v1/admin", tags=["Admin Api"])
 
 
 if __name__ == "__main__":
