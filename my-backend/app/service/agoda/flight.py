@@ -71,15 +71,15 @@ def search_round_trip(origin, destination, departure_date, return_date, sort, pa
 
     return response.json()
 
-def flight_details(itenary_id, token):
+def flight_details(itenary_id, token, language, currency):
 
     url = "https://agoda-com.p.rapidapi.com/flights/details"
 
-    querystring = {"itineraryId":itenary_id,"token":token}
+    querystring = {"itineraryId":itenary_id,"token":token, "language": language, "currency": currency}
 
     headers = {
-        "x-rapidapi-key": "f419aee40cmsh30d7ffb65a062fbp145396jsn95b5295dfb39",
-        "x-rapidapi-host": "agoda-com.p.rapidapi.com"
+        "x-rapidapi-key": RAPIDAPI_KEY,
+        "x-rapidapi-host": RAPIDAPI_HOST
     }
 
     response = requests.get(url, headers=headers, params=querystring)

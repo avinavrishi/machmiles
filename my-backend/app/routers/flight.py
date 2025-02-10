@@ -215,7 +215,8 @@ def search_two_way_flight(request_data: SearchTwoWayPayload):
 @router.post("/get-flight-details")
 def search_one_way_flight(request_data: GetFlightDetails):
 
-    flight_data = flight_details(request_data.itenary_id, request_data.token)
+    flight_data = flight_details(request_data.itenary_id, request_data.token, request_data.language, request_data.currency)
+    # print(flight_data)
 
     itinerary = flight_data['data']['itinerary']
 
