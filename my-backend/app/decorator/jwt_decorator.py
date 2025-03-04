@@ -12,12 +12,10 @@ from core.config import SECRET_KEY
 
 def jwt_authorization(authorization: str = Header(None), db: Session = Depends(get_db)):
     if not authorization or not authorization.startswith("Bearer "):
-            
             raise HTTPException(status_code=401, detail="Bearer token not provided")
 
     token = authorization.split("Bearer ")[1]
     try:
-
         login_detail = db.query(Token).filter(Token.token == token).first()
         if login_detail is None:
              raise HTTPException(status_code=401, detail="Invalid token")
@@ -35,4 +33,4 @@ def jwt_authorization(authorization: str = Header(None), db: Session = Depends(g
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    return {"user_id": user_id,"username": username, "token": token}
+    return {"user_id": user_id, "username": username, "is_admin": user.is_admin, "is_staff": user.is_staff}

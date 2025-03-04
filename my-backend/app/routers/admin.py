@@ -3,14 +3,22 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from typing import Dict
 from database.session import get_db
-from database.models import User, Token
+from database.models import User, Booking, Payment
 from datetime import datetime, timedelta
 from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
+from decorator.jwt_decorator import jwt_authorization
 
 router = APIRouter()
 
+
 @router.post("/get-all-users")
-def get_all_user(db: Session = Depends(get_db)):
+def get_all_user(
+    db: Session = Depends(get_db), 
+    token_data: dict = Depends(jwt_authorization)  # Extracting token data
+):
+    # Checking if the user is admin
+    if not token_data.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Permission denied")
 
     all_users = db.query(User).filter(User.is_admin != 1).all()
 
@@ -21,7 +29,15 @@ def get_all_user(db: Session = Depends(get_db)):
 
 
 @router.delete("/delete-user/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(
+    user_id: int, 
+    db: Session = Depends(get_db), 
+    token_data: dict = Depends(jwt_authorization)  # Extracting token data
+):
+    # Checking if the user is admin
+    if not token_data.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Permission denied")
+
     user = db.query(User).filter(User.id == user_id).first()
     
     if not user:
@@ -34,7 +50,14 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/get-all-bookings")
-def get_all_bookings(db: Session = Depends(get_db)):
+def get_all_bookings(
+    db: Session = Depends(get_db), 
+    token_data: dict = Depends(jwt_authorization)  # Extracting token data
+):
+    # Checking if the user is admin
+    if not token_data.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Permission denied")
+
     all_bookings = db.query(Booking).all()
     
     if not all_bookings:
@@ -42,22 +65,17 @@ def get_all_bookings(db: Session = Depends(get_db)):
     
     return {"bookings": all_bookings}
 
-@router.post("/set-status/{booking_id}")
-def set_status(booking_id: int, db: Session = Depends(get_db)):
-    booking = db.query(Booking).filter(Booking.booking_id == booking_id).first()
-    
-    if not booking:
-        raise HTTPException(status_code=404, detail="Booking not found")
-    
-    booking.status = 1
-    db.commit()
-    db.refresh(booking)
-    
-    return {"message": "Booking status updated to 1", "booking": booking}
-
 
 @router.delete("/delete-booking/{booking_id}")
-def delete_booking(booking_id: int, db: Session = Depends(get_db)):
+def delete_booking(
+    booking_id: int, 
+    db: Session = Depends(get_db),
+    token_data: dict = Depends(jwt_authorization) 
+    ):
+
+    if not token_data.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
     booking = db.query(Booking).filter(Booking.booking_id == booking_id).first()
     
     if not booking:
@@ -70,7 +88,11 @@ def delete_booking(booking_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/get-all-payments")
-def get_all_payments(db: Session = Depends(get_db)):
+def get_all_payments(db: Session = Depends(get_db), token_data: dict = Depends(jwt_authorization) ):
+
+    if not token_data.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
     all_payments = db.query(Payment).all()
     
     if not all_payments:
@@ -80,7 +102,11 @@ def get_all_payments(db: Session = Depends(get_db)):
 
 
 @router.delete("/delete-payment/{payment_id}")
-def delete_payment(payment_id: int, db: Session = Depends(get_db)):
+def delete_payment(payment_id: int, db: Session = Depends(get_db), token_data: dict = Depends(jwt_authorization) ):
+
+    if not token_data.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
     payment = db.query(Payment).filter(Payment.payment_id == payment_id).first()
     
     if not payment:
