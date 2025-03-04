@@ -11,7 +11,7 @@ from decorator.jwt_decorator import jwt_authorization
 router = APIRouter()
 
 
-@router.post("/get-all-users")
+@router.get("/get-all-users")
 def get_all_user(
     db: Session = Depends(get_db), 
     token_data: dict = Depends(jwt_authorization)  # Extracting token data
