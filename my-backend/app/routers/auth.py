@@ -31,7 +31,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     hashed_password = hash_password(user.password)
 
     # Create new user
-    new_user = User(username=user.username, password=hashed_password, email=user.email)
+    new_user = User(username=user.username, password=hashed_password, email=user.email, is_admin = 0, is_staff = 0)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -82,7 +82,6 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
             "type": "refresh"
         }
 
-
         # Generate tokens
         access_token = create_access_token(
             data=token_data,
@@ -92,8 +91,6 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
             data=refresh_token_data,
             expires_delta=refresh_token_expires
         )
-
-        print("hiiiiiiii")
 
         # Use a transaction for database operations
         try:
@@ -124,6 +121,9 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
             )
 
         return {
+            "username": db_user.username,
+            "is_admin": db_user.is_admin,
+            "is_staff": db_user.is_staff,
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
