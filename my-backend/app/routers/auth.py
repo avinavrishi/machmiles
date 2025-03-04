@@ -74,11 +74,15 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
         token_data = {
             "sub": db_user.username,
             "user_id": db_user.user_id,
+            "is_admin": db_user.is_admin,
+            "is_staff": db_user.is_staff,
             "type": "access"  # Add token type for additional security
         }
         refresh_token_data = {
             "sub": db_user.username,
             "user_id": db_user.user_id,
+            "is_admin": db_user.is_admin,
+            "is_staff": db_user.is_staff,
             "type": "refresh"
         }
 

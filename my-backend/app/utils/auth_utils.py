@@ -34,7 +34,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     })
 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    print("hiiii")
     return encoded_jwt
 
 def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
