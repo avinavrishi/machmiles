@@ -39,33 +39,101 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     return {"msg": "User created successfully", "user_id": new_user.user_id}
 
 @router.post("/login/")
-def login(user: UserLogin, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.username == user.username).first()
-    
-    # Verify user exists and password is correct
-    if not db_user or not verify_password(user.password, db_user.password):
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+async def login(user: UserLogin, db: Session = Depends(get_db)):
+    try:
+        # Get user with a single query
+        db_user = (
+            db.query(User)
+            .filter(User.username == user.username)
+            .first()
+        )
+        
+        # Early return if user doesn't exist or password is wrong
+        if not db_user or not verify_password(user.password, db_user.password):
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid username or password"
+            )
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    refresh_token_expires = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        # Parse environment variables with error handling
+        try:
+            access_token_expire_minutes = int(ACCESS_TOKEN_EXPIRE_MINUTES)
+            refresh_token_expire_days = int(REFRESH_TOKEN_EXPIRE_DAYS)
+        except ValueError:
+            raise HTTPException(
+                status_code=500,
+                detail="Invalid token expiration configuration"
+            )
 
-    token_data = {"sub": db_user.username, "user_id": db_user.user_id}
+        # Calculate token expiration times
+        current_time = datetime.utcnow()
+        access_token_expires = timedelta(minutes=access_token_expire_minutes)
+        refresh_token_expires = timedelta(days=refresh_token_expire_days)
 
-    access_token = create_access_token(data=token_data, expires_delta=access_token_expires)
-    refresh_token = create_refresh_token(data=token_data, expires_delta=refresh_token_expires)
+        
+        token_data = {
+            "sub": db_user.username,
+            "user_id": db_user.user_id,
+            "type": "access"  # Add token type for additional security
+        }
+        refresh_token_data = {
+            "sub": db_user.username,
+            "user_id": db_user.user_id,
+            "type": "refresh"
+        }
 
-    # Remove existing tokens to prevent multiple refresh tokens for one user
-    db.query(Token).filter(Token.user_id == db_user.user_id).delete()
-    
-    # Save new tokens in database
-    db.add_all([
-        Token(user_id=db_user.user_id, token_type="access", token=access_token, expires_at=datetime.utcnow() + access_token_expires),
-        Token(user_id=db_user.user_id, token_type="refresh", token=refresh_token, expires_at=datetime.utcnow() + refresh_token_expires)
-    ])
-    db.commit()
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "refresh_token": refresh_token
-    }
+        # Generate tokens
+        access_token = create_access_token(
+            data=token_data,
+            expires_delta=access_token_expires
+        )
+        refresh_token = create_refresh_token(
+            data=refresh_token_data,
+            expires_delta=refresh_token_expires
+        )
+
+        print("hiiiiiiii")
+
+        # Use a transaction for database operations
+        try:
+            # Remove old tokens
+            db.query(Token).filter(Token.user_id == db_user.user_id).delete()
+            
+            # Add new tokens
+            db.add_all([
+                Token(
+                    user_id=db_user.user_id,
+                    token_type="access",
+                    token=access_token,
+                    expires_at=current_time + access_token_expires
+                ),
+                Token(
+                    user_id=db_user.user_id,
+                    token_type="refresh",
+                    token=refresh_token,
+                    expires_at=current_time + refresh_token_expires
+                )
+            ])
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail="Error while processing authentication"
+            )
+
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "expires_in": access_token_expire_minutes * 60  # Return expiration in seconds
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error during authentication"
+        )

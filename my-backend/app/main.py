@@ -22,7 +22,7 @@ app.add_middleware(
 # Include your routers here
 app.include_router(auth.router, prefix="/rest/v1/auth", tags=["Authentication"])
 app.include_router(flight.router, prefix="/rest/v1/flight", tags=["Flight Api"])
-app.include_router(flight.router, prefix="/rest/v1/admin", tags=["Admin Api"])
+app.include_router(admin.router, prefix="/rest/v1/admin", tags=["Admin Api"])
 
 
 if __name__ == "__main__":
