@@ -74,8 +74,8 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
         token_data = {
             "sub": db_user.username,
             "user_id": db_user.user_id,
-            "is_admin": db_user.is_admin,
-            "is_staff": db_user.is_staff,
+            "is_admin": db_user.is_admin if db_user.is_admin is not None else 0,
+            "is_staff": db_user.is_staff if db_user.is_admin is not None else 0,
             "type": "access"  # Add token type for additional security
         }
         refresh_token_data = {
@@ -96,11 +96,16 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
             expires_delta=refresh_token_expires
         )
 
+        
+
         # Use a transaction for database operations
         try:
             # Remove old tokens
-            db.query(Token).filter(Token.user_id == db_user.user_id).delete()
-            
+            # Check if tokens exist before deleting
+            existing_tokens = db.query(Token).filter(Token.user_id == db_user.user_id).all()
+            if existing_tokens:
+                db.query(Token).filter(Token.user_id == db_user.user_id).delete()
+
             # Add new tokens
             db.add_all([
                 Token(

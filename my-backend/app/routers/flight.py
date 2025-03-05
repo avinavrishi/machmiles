@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Dict, Optional
 from database.session import get_db
-from database.models import User, Token
+from database.models import User, Token, Booking, Payment
 from decorator.jwt_decorator import jwt_authorization
 from fastapi.responses import JSONResponse
 from service.agoda.language_currency import get_language, get_currency
@@ -105,7 +105,6 @@ def auto_complete_search(query: str):
 
 @router.post("/search-one-way-flight")
 def search_one_way_flight(request_data: SearchOneWayPayload):
-
     flight_details = search_one_way(
         request_data.origin,
         request_data.destination,
@@ -121,14 +120,18 @@ def search_one_way_flight(request_data: SearchOneWayPayload):
         request_data.currency
     )
 
-    bundles = flight_details['data']['bundles']
+    if flight_details['status'] == 'error':
+        # raise HTTPException(status_code=500, detail="Failed to retrieve flight details from the API.")
+        return flight_details
 
-    data=[]
+    bundles = flight_details['data']['data']['bundles']
+
+    data = []
 
     for bundle in bundles:
         itenary = bundle['itineraries'][0]['itineraryInfo']
         itenary_data = {
-            "id" : itenary['id'],
+            "id": itenary['id'],
             "token": itenary['token'],
             "flight_number": bundle['outboundSlice']['segments'][0]['flightNumber'],
             "carrier_name": itenary['ticketingCarrierContent']['carrierName'],
@@ -141,7 +144,6 @@ def search_one_way_flight(request_data: SearchOneWayPayload):
             "cabin_class": bundle['outboundSlice']['segments'][0]['cabinClassContent'],
             "passport_required": itenary['passportRequired'],
             "cart_info": itenary['cartInfo']
-
         }
 
         for price in itenary['price'][(request_data.currency).lower()]['charges']:
@@ -149,10 +151,6 @@ def search_one_way_flight(request_data: SearchOneWayPayload):
                 itenary_data['price_inclusive'] = price['total']['inc']
                 itenary_data['price_exclusive'] = price['total']['exc']
                 break
-
-        # print(itenary_data)
-        # print("=======================")
-        
 
         data.append(itenary_data)
 

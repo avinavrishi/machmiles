@@ -2,3 +2,4 @@ my-backend/app/dev.conf
 my-backend/app/machmiles-env
 *.pyc
 my-backend/app/flight.db
+.qodo/history.sqlite
